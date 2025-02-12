@@ -1,51 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Access</title>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ergonomic Posture Estimator</title>
     <style>
-        video {
-            width: 500px;
-            height: auto;
-            border: 2px solid #000;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        
+      }
+    body {
+        background-image: url("{{ url_for('static', filename='img3.png') }}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        height: 100vh;
+        overflow: hidden;
+        margin: 0;
+        backdrop-filter: blur(2px);
+      }
+      .content{
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        display: flex;
+        gap: 5vw;
+        align-items: center;
+        justify-content: center;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      #video-container {
+        margin-top: 10vh;
+        position: relative;
+        border: 3px solid rgb(37, 212, 247);
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: white;
+      }
+      #stop-button {
+        padding: 10px 20px;
+        background-color: rgb(25, 0, 138);
+        color: white;
+        font-weight:600;
+        border:2px solid white;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      #stop-button:hover {
+        background-color: #ff1c1c;
+      }
+      #start-button {
+        padding: 10px 20px;
+        font-size: 15px;
+        font-weight:600;
+        border:2px solid white;
+        background-color: rgb(37, 212, 247);
+        color: white;
+        border: none;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      #start-button:hover {
+        background-color: #45a049;
+      }
+      .header {
+        width: 100%;
+        padding: 1.7rem;
+        text-align: left;
+        color: white;
+        font-size: 24px;
+        background: rgba(0, 0, 0, 0.5);
+        font-family: 'Audiowide', cursive;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000; 
+        border-bottom: rgb(37, 212, 247) 2px solid; 
+    }
+      .header-text {
+        font-weight: 400;
+        font-style: normal;
+        font-size: 3rem;
+        
+      }
+      .button-set {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1vh;
+        gap: 2vw;
+        align-items: center;
+      }
+      .content-text {
+        font-size: 24px;
+        color: #333;
+        margin: 1rem;
+        width: 15vw;
+        max-width: 18vw;
+      }
     </style>
-</head>
-<body>
-    <h2>Camera Feed</h2>
-    <video id="camera" autoplay></video>
-    <button id="capture">Capture Photo</button>
-    <canvas id="snapshot" style="display:none;"></canvas>
+  </head>
+
+  <body>
+    <header class="header">
+        <p class="header-text">BACK-UP</p>
+      </header>
+    <div class="content">
+        
+      <div id="video-container">
+        <img id="video-feed" src="{{ url_for('video_feed') }}" width="800" />
+        <div class="button-set">
+          <button id="stop-button">Stop</button>
+          <button id="start-button">Start</button>
+        </div>
+      </div>
+
+      <div id="video-container">
+        <p class="content-text" id="neck-angle">Neck</p>
+        <p class="content-text" id="back-angle">Back</p>
+      </div>
+    </div>
 
     <script>
-        const video = document.getElementById('camera');
-        const canvas = document.getElementById('snapshot');
-        const context = canvas.getContext('2d');
-        const captureButton = document.getElementById('capture');
-
-        // Access camera
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(error => {
-                console.error('Error accessing the camera:', error);
-            });
-
-        // Capture photo
-        captureButton.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Save image
-            const imageUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = 'captured_image.png';
-            link.click();
+      document
+        .getElementById("stop-button")
+        .addEventListener("click", function () {
+          document.getElementById("video-feed").src = "";
         });
+      document
+        .getElementById("start-button")
+        .addEventListener("click", function () {
+          document.getElementById("video-feed").src =
+            "{{ url_for('video_feed') }}";
+        });
+      function fetchData() {
+        fetch("/data_feed")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById(
+              "neck-angle"
+            ).textContent = `Neck : ${data.neck_feedback}`;
+            document.getElementById(
+              "back-angle"
+            ).textContent = `Back : ${data.back_feedback}`;
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+
+      setInterval(fetchData, 1000);
     </script>
-</body>
+  </body>
 </html>
