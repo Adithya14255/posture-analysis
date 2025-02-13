@@ -21,7 +21,7 @@ def calculate_angle(a, b, c):
 
 # Setup video capture
 #video_file = "pose1.mp4"
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
 # Initialize Mediapipe pose

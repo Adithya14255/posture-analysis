@@ -141,7 +141,7 @@
             "{{ url_for('video_feed') }}";
         });
       function fetchData() {
-        fetch("/data_feed")
+        fetch("/feedback")
           .then((response) => response.json())
           .then((data) => {
             document.getElementById(
